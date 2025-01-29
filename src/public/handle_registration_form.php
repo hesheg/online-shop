@@ -48,12 +48,11 @@ $pdo->exec("INSERT INTO users (name, email, password) VALUES ('$nameValid', '$em
 echo "\n";
 
 
-$statement = $pdo->query("SELECT count(*) FROM users");
+$statement = $pdo->query("SELECT max(id) FROM users");
 $data = $statement->fetch();
 echo "<pre>";
-//print_r($data);
 
 
-$statement = $pdo->query("SELECT * FROM users WHERE id = 20");
+$statement = $pdo->query("SELECT * FROM users WHERE id = $data[0] - 1");
 $res = $statement->fetch();
-//print_r($res);
+print_r($res);
