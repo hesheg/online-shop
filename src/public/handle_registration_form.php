@@ -20,20 +20,17 @@ if (isset ($_POST['email'])) {
 
     $pdo = new PDO("pgsql:host=db; port=5432; dbname=db;", username: "dbuser", password: "dbpwd");
 
-    $stmt = $pdo->prepare("SELECT count(id) FROM users WHERE email = :email");
+    $stmt = $pdo->prepare("SELECT count(*) FROM users WHERE email = :email");
     $stmt->execute(['email' => $email]);
+    $count = $stmt->fetch();
 
-    if ($stmt->fetch() > 0) {
-        $errors['email'] = 'Пользователь с таким email уже существует';
-    } elseif (strlen($email) < 5) {
+     if (strlen($email) < 5) {
         $errors['email'] = 'Количество символов в email должно быть больше 5';
     } elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-        $errors['email'] = 'В email обязательно должы быть символы "@" и "."';
+        $errors['email'] = 'В email обязательно должны быть символы "@" и "."';
+    } elseif ($count[0] > 0) {
+        $errors['email'] = 'Пользователь с таким email уже существует';
     }
-
-
-
-
 }
 
 if (isset ($_POST['psw'])) {
@@ -50,7 +47,6 @@ if (isset ($_POST['psw-repeat'])) {
     $errors['psw-repeat'] = 'Пароли не совпадают';
     }
 }
-
 
 if (empty($errors)) {
     $pdo = new PDO("pgsql:host=db; port=5432; dbname=db;", username: "dbuser", password: "dbpwd");
