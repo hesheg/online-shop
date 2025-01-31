@@ -1,58 +1,69 @@
 <?php
 
-echo "<pre>";
-//print_r($_GET);
+$errors = [];
 
-$name = $_GET['name'];
-$email = $_GET['email'];
-$password = $_GET['psw'];
-$passwordRep = $_GET['psw-repeat'];
+if (isset ($_POST['name'])) {
+    $name = $_POST['name'];
 
-
-if (ctype_alpha($name)) {
-    echo '';
-} else {
-    exit('В имени не должны быть цифры и другие знаки. Только латинские буквы');
+    if (strlen($name) < 2 || strlen($name) > 40) {
+        $errors['name'] = 'В имени должно быть больше 2 и меньше 40 символов';
+    } elseif (!ctype_alpha($name)) {
+        $errors['name'] = 'В имени не должны быть цифры и другие знаки. Только латинские буквы';
+    }
 }
 
-$nameValid = '';
-if (strlen($name) >= 2 && strlen($name) <= 50) {
-    $nameValid .= $name;
-} else {
-    exit('Имя не должно иметь меньше 2 или больше 50 символов');
+if (isset ($_POST['email'])) {
+    $email = $_POST['email'];
+
+    $emailToLower = strtolower($email);
+    $email = trim($emailToLower);
+
+    $pdo = new PDO("pgsql:host=db; port=5432; dbname=db;", username: "dbuser", password: "dbpwd");
+
+    $stmt = $pdo->prepare("SELECT count(id) FROM users WHERE email = :email");
+    $stmt->execute(['email' => $email]);
+
+    if ($stmt->fetch() > 0) {
+        $errors['email'] = 'Пользователь с таким email уже существует';
+    } elseif (strlen($email) < 5) {
+        $errors['email'] = 'Количество символов в email должно быть больше 5';
+    } elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+        $errors['email'] = 'В email обязательно должы быть символы "@" и "."';
+    }
+
+
+
+
 }
 
-$emailToLower = strtolower($email);
-$emailValid = trim($emailToLower);
+if (isset ($_POST['psw'])) {
+    $password = $_POST['psw'];
+    if (strlen($password) < 8 || strlen($password) > 20) {
+        $errors['psw'] = 'Длина пароля должна быть больше 8 и меньше 20 символов';
+    }
+}
 
+if (isset ($_POST['psw-repeat'])) {
+    $passwordRep = $_POST['psw-repeat'];
 
-if ($password === $passwordRep) {
-    echo '';
-} else {
-    exit('Неправильно введен повторный пароль');
+    if ($password !== $passwordRep) {
+    $errors['psw-repeat'] = 'Пароли не совпадают';
+    }
 }
 
 
-$passwordValid = '';
+if (empty($errors)) {
+    $pdo = new PDO("pgsql:host=db; port=5432; dbname=db;", username: "dbuser", password: "dbpwd");
 
-if (strlen($password) >= 8 && strlen($password) <= 20) {
-    $passwordValid .= $password;
-} else {
-    exit('Длина пароля должна быть больше или равно 8 символам и меньше или равно 20 символам');
+    $password = password_hash($password, PASSWORD_DEFAULT);
+
+    $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)");
+    $stmt->execute(['name' => $name, 'email' => $email, 'password' => $password]);
+
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email");
+    $stmt->execute(['email' => $email]);
+    $data = $stmt->fetch();
+    print_r($data);
 }
 
-
-$pdo = new PDO("pgsql:host=db; port=5432; dbname=db;", username: "dbuser", password: "dbpwd");
-
-$pdo->exec("INSERT INTO users (name, email, password) VALUES ('$nameValid', '$emailValid', '$passwordValid')");
-echo "\n";
-
-
-$statement = $pdo->query("SELECT max(id) FROM users");
-$data = $statement->fetch();
-echo "<pre>";
-
-
-$statement = $pdo->query("SELECT * FROM users WHERE id = $data[0] - 1");
-$res = $statement->fetch();
-print_r($res);
+require_once './registration_form.php';

@@ -5,7 +5,7 @@ $pdo = new PDO("pgsql:host=db; port=5432; dbname=db;", username: "dbuser", passw
 //$pdo->exec("INSERT INTO users (name, email, password) VALUES ('Dasha', 'dasha@mail.ru', '4321')");
 
 $statement = $pdo->query("SELECT * FROM users");
-$data = $statement->fetch();
+$data = $statement->fetchAll();
 echo "<pre>";
 print_r($data);
 
