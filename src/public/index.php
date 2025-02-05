@@ -8,4 +8,3 @@ $statement = $pdo->query("SELECT * FROM users");
 $data = $statement->fetchAll();
 echo "<pre>";
 print_r($data);
-

@@ -1,8 +1,14 @@
 <?php
+session_start();
 
-if (!isset($_COOKIE['user_id'])) {
+if (!isset($_SESSION['user_id'])) {
     header("Location: /login_form.php");
 }
+
+//if (!isset($_COOKIE['user_id'])) {
+//    header("Location: /login_form.php");
+//}
+
 $pdo = new PDO("pgsql:host=db; port=5432; dbname=db;", username: "dbuser", password: "dbpwd");
 
 $stmt = $pdo->query('SELECT * FROM products');
