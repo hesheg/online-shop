@@ -1,5 +1,6 @@
 <div class="container">
-    <a href="profile.php">Мой профиль</a>
+    <a href="/profile">Мой профиль</a>
+    <a href="/cart">Корзина</a>
     <h3>Catalog</h3>
     <div class="card-deck">
         <?php foreach ($products as $product): ?>
@@ -13,13 +14,29 @@
                         <p class="card-text text-muted"><?php echo $product['name']; ?></p>
                         <a href="#"><h5 class="card-title"><?php echo $product['description']; ?></h5></a>
                         <div class="card-footer">
-                            <?php echo $product['price'];?>
+                            <?php echo $product['price'] . '$';?>
                         </div>
                     </div>
                 </a>
             </div>
-        <?php endforeach; ?>
 
+            <form action="/add-product" method="POST">
+                <div class="container">
+                    <input type="hidden" placeholder="Enter product-id" name="product-id" value="<?php echo $product['id']; ?>" id="product-id" required>
+
+                   <?php if (isset($errors['amount'])): ?> <label style="color: brown"><?php echo $errors['amount'];?></label>
+                    <?php endif;?>
+
+                    <input type="text" placeholder="Enter amount" name="amount" id="amount" required>
+
+
+                    <button type="submit" class="registerbtn">Add product</button>
+                </div>
+
+            </form>
+        <?php endforeach; ?>
+    </div>
+</div>
 
 
 <style>

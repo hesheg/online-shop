@@ -57,11 +57,10 @@
 
             <div class="nav">
                 <ul>
-                    <li onclick="location.href='catalog.php'">Каталог</li>
-                    <li onclick="location.href='basket.php'">Корзина</li>
-                    <li onclick="location.href='settings.php'"> Настройки</li>
-                    <li onclick="location.href='login_form.php'">Выйти</li>
-
+                    <li onclick="location.href='catalog'">Каталог</li>
+                    <li onclick="location.href='cart'">Корзина</li>
+                    <li onclick="location.href='edit-profile'">Редактировать профиль</li>
+                    <li onclick="location.href='logout'"> Выйти</li>
                 </ul>
             </div>
             <div class="profile-body">
