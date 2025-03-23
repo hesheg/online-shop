@@ -1,85 +1,10 @@
 <?php
 
+namespace Core;
+
 class App
 {
-    private array $routes = [
-
-        '/registration' => [
-            'GET' => [
-                'class' => 'UserController',
-                'method' => 'getRegistrateForm',
-            ],
-            'POST' => [
-                'class' => 'UserController',
-                'method' => 'registrate',
-            ],
-        ],
-
-        '/login' => [
-            'GET' => [
-                'class' => 'UserController',
-                'method' => 'getLoginForm',
-            ],
-            'POST' => [
-                'class' => 'UserController',
-                'method' => 'login',
-            ],
-        ],
-
-        '/profile' => [
-            'GET' => [
-                'class' => 'UserController',
-                'method' => 'profile',
-            ],
-            'POST' => [
-                'class' => 'UserController',
-                'method' => 'profile',
-            ],
-        ],
-
-        '/edit-profile' => [
-            'GET' => [
-                'class' => 'UserController',
-                'method' => 'getEditProfileForm',
-            ],
-            'POST' => [
-                'class' => 'UserController',
-                'method' => 'editProfile',
-            ],
-        ],
-
-        '/catalog' => [
-            'GET' => [
-                'class' => 'ProductController',
-                'method' => 'getCatalog',
-            ],
-            'POST' => [
-                'class' => 'ProductController',
-                'method' => 'getCatalogPage',
-            ],
-        ],
-
-        '/add-product' => [
-            'POST' => [
-                'class' => 'ProductController',
-                'method' => 'addProduct',
-            ],
-        ],
-
-        '/cart' => [
-            'GET' => [
-                'class' => 'CartController',
-                'method' => 'cart',
-            ],
-        ],
-
-        '/logout' => [
-            'GET' => [
-                'class' => 'UserController',
-                'method' => 'logout',
-            ],
-        ],
-    ];
+    private array $routes = [];
 
 
     public function run()
@@ -96,15 +21,46 @@ class App
                 $class = $handler['class'];
                 $method = $handler['method'];
 
-                require_once "../Controllers/$class.php";
                 $controller = new $class();
                 $controller->$method();
             } else {
-                echo "Метод $requestMethod не поддерживается для $requestUri";
+                echo "Метод $requestMethod не поддерживается для адреса $requestUri";
             }
         } else {
             http_response_code(404);
             require_once '../Views/404.php';
         }
+    }
+
+    public function get(string $route, string $className, string $method)
+    {
+        $this->routes[$route]['GET'] = [
+            'class' => $className,
+            'method' => $method,
+        ];
+    }
+
+    public function post(string $route, string $className, string $method)
+    {
+        $this->routes[$route]['POST'] = [
+            'class' => $className,
+            'method' => $method,
+        ];
+    }
+
+    public function put(string $route, string $className, string $method)
+    {
+        $this->routes[$route]['PUT'] = [
+            'class' => $className,
+            'method' => $method,
+        ];
+    }
+
+    public function delete(string $route, string $className, string $method)
+    {
+        $this->routes[$route]['DELETE'] = [
+            'class' => $className,
+            'method' => $method,
+        ];
     }
 }

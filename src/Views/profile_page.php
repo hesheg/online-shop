@@ -1,10 +1,10 @@
 <div class="container">
     <div class="profile-header">
         <div class="profile-img">
-            <img src="<?php echo $user['image_url']; ?>" width="200" alt="Profile Image">
+            <img src="" width="200" alt="Profile Image">
         </div>
         <div class="profile-nav-info">
-            <h3 class="user-name"><h2><?php echo $user['name'] ?></h2></h3>
+            <h3 class="user-name"><h2><?php echo $user->getName(); ?></h2></h3>
             <div class="address">
                 <p id="state" class="state">New York,</p>
                 <span id="country" class="country">USA.</span>
@@ -22,8 +22,7 @@
     <div class="main-bd">
         <div class="left-side">
             <div class="profile-side">
-                <p class="age"><i class="age"></i> Возраст: <?php echo $user['age']; ?></p>
-                <p class="email"><i class="fa fa-envelope"></i> <h2><?php echo $user['email'] ?></h2></p>
+                <p class="email"><i class="fa fa-envelope"></i> <h2><?php echo $user->getEmail(); ?></h2></p>
                 <div class="user-bio">
                     <h3>Bio</h3>
                     <p class="bio">

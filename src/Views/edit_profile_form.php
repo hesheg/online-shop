@@ -6,11 +6,12 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 if (isset($_SESSION['user_id'])) {
 
-    $user_id = $_SESSION['user_id'];
+    $userId = $_SESSION['user_id'];
 
     $pdo = new PDO("pgsql:host=db; port=5432; dbname=db;", username: "dbuser", password: "dbpwd");
-    $stmt = $pdo->query("SELECT * FROM users WHERE id = $user_id");
+    $stmt = $pdo->query("SELECT * FROM users WHERE id = $userId");
     $user = $stmt->fetch();
+
 } else {
     header('Location: /login');
 }
@@ -21,12 +22,14 @@ if (isset($_SESSION['user_id'])) {
     <h1>Edit Profile</h1>
     <hr>
 
-            <form action="/edit_profile" method="POST" class="form example">
+            <form action="/edit-profile" method="POST" class="form example">
                 <div class="form-group">
                     <label class="col-md-3 control-label">Username:</label>
                     <div class="col-md-8">
                         <label>
                             <input name="name" class="form-control" type="text" value="<?php echo $user['name']; ?>">
+                            <?php if (isset($errors['name'])): ?> <label style="color: brown"><?php echo $errors['name']; ?></label>
+                            <?php endif; ?>
                         </label>
                     </div>
                 </div>
@@ -35,6 +38,8 @@ if (isset($_SESSION['user_id'])) {
                     <div class="col-lg-8">
                         <label>
                             <input name="email" class="form-control" type="text" value="<?php echo $user['email']; ?>">
+                            <?php if (isset($errors['email'])): ?> <label style="color: brown"><?php echo $errors['email']; ?></label>
+                            <?php endif; ?>
                         </label>
                     </div>
                 </div>

@@ -1,37 +1,37 @@
 <div class="app">
     <div class="top">
         <div class="section-title">
-            <h2>Your Cart</h2>
+            <h2>Ваша корзина</h2>
         </div>
-        <?php foreach ($products as $product): ?>
         <div class="price">
             <p class="price-title">
-                Payment Amount
+                Итоговая стоимость:
             </p>
             <p class="price-amount">
-                $51.96
+                <?php echo $sum; ?>
             </p>
         </div>
     </div>
     <div class="cart-list">
+        <?php foreach ($products as $product): ?>
         <div class="cart-item">
             <div class="item-image">
-                <img src='<?php echo $product['image_url']; ?>' alt="">
+                <img src='<?php echo $product->getProduct()->getImageUrl(); ?>' alt="">
             </div>
             <div class="item-info">
-                <h3 class="item-title"><?php echo $product['name']; ?></h3>
-                <p class="price-amount"><?php echo '$' . $product['price']; ?></p>
-            </div>
-            <div>
-                <?php echo 'Количество: ' . $product['amount']; ?>
+                <h3 class="item-title"><?php echo $product->getProduct()->getName(); ?></h3>
+                <p class="price-amount"><?php echo '$' . $product->getProduct()->getPrice(); ?></p>
+                <?php echo 'Количество: ' . $product->getAmount(); ?>
             </div>
         </div>
+        <?php endforeach; ?>
     </div>
-    <div class="navigate">
-        <button class="button button-back"><i class="fa fa-angle-left"></i></button>
-        <button class="button button-pay">Pay</button>
-    </div>
-    <?php endforeach; ?>
+<!--    <div class="navigate">-->
+<!--        <button class="button button-back"><i class="fa fa-angle-left"></i></button>-->
+        <button class="button button-pay"><a href="/create-order">Оформить заказ</a></button>
+
+
+<!--    </div>-->
 </div>
 
 <style>

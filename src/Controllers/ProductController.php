@@ -1,7 +1,21 @@
 <?php
 
+namespace Controllers;
+
+use Model\Product;
+use Model\UserProduct;
+
 class ProductController
 {
+    private Product $productModel;
+    private UserProduct $userProductModel;
+
+    public function __construct()
+    {
+        $this->productModel = new Product();
+        $this->userProductModel = new UserProduct();
+    }
+
     public function getCatalogPage()
     {
         require_once '../Views/catalog_page.php';
@@ -18,9 +32,7 @@ class ProductController
             exit;
         }
 
-        require_once '../Model/Product.php';
-        $productModel = new Product();
-        $products = $productModel->getProducts();
+        $products = $this->productModel->getAll();
 
         require_once '../Views/catalog_page.php';
     }
@@ -39,21 +51,49 @@ class ProductController
         $errors = $this->validateAddProduct($_POST);
 
         if (empty($errors)) {
-            $pdo = new PDO("pgsql:host=db; port=5432; dbname=db;", username: "dbuser", password: "dbpwd");
             $userId = $_SESSION['user_id'];
             $productId = $_POST['product-id'];
-            $amount = $_POST['amount'];
+            $amount = 1;
+            $result = $this->userProductModel->getByProdIdAndUserId($productId, $userId);
 
-            require_once '../Model/Product.php';
-            $productModel = new Product();
-            $result = $productModel->getProdByProdIdAndUserId($productId, $userId);
-
-            if ($result === false) {
-                $productModel->insertProducts($userId, $productId, $amount);
+            if ($result === null) {
+                $this->userProductModel->insertProducts($userId, $productId, $amount);
             } else {
-                $amount = $amount + $result['amount'];
+                $amount += $result->getAmount();
 
-                $productModel->updateProducts($amount, $userId, $productId);
+                $this->userProductModel->updateProducts($amount, $userId, $productId);
+            }
+
+            header("Location: /catalog");
+        }
+    }
+
+
+    public function decreaseProduct()
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['user_id'])) {
+            header("Location: /login");
+            exit;
+        }
+
+        $errors = $this->validateAddProduct($_POST);
+
+        if (empty($errors)) {
+            $userId = $_SESSION['user_id'];
+            $productId = $_POST['product-id'];
+            $result = $this->userProductModel->getByProdIdAndUserId($productId, $userId);
+
+            if ($result !== null) {
+                if ($result->getAmount() === 1) {
+                    $result->deleteByUserId($userId);
+                }
+                $amount = $result->getAmount() - 1;
+
+                $this->userProductModel->updateProducts($amount, $userId, $productId);
             }
 
             header("Location: /catalog");
@@ -67,22 +107,18 @@ class ProductController
         if (isset($data['product-id'])) {
             $productId = (int)$data['product-id'];
 
-            require_once '../Model/Product.php';
-            $productModel = new Product();
-            $data = $productModel->getById($productId);
+            $data = $this->productModel->getOneById($productId);
 
-            if ($data === false) {
+            if ($data === null) {
                 $errors['product-id'] = 'Продукт не найден';
             }
         } else {
             $errors['product-id'] = 'id продукта должен быть указан';
         }
 
-        if (isset($data['amount'])) {
-            if ($data['amount'] <= 0) {
-                $errors['amount'] = 'Количество продуктов должно быть больше 0';
-            }
-        }
+//        if (!isset($data['amount'])) {
+//            $errors['amount'] = 'Укажите количество добавляемого продукта';
+//        }
 
         return $errors;
     }

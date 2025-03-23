@@ -1,7 +1,19 @@
 <?php
 
+namespace Controllers;
+use Model\Product;
+use Model\UserProduct;
+
 class CartController
 {
+    private UserProduct $userProductModel;
+    private Product $productModel;
+
+    public function __construct()
+    {
+        $this->userProductModel = new UserProduct();
+        $this->productModel = new Product();
+    }
     public function cart()
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -13,21 +25,23 @@ class CartController
             exit;
         }
 
-        require_once '../Model/UserProducts.php';
-        $cart = new UserProducts();
-        $userProducts = $cart->getUserProducts();
         $products = [];
+        $sum = 0;
+        $userId = $_SESSION['user_id'];
+        $userProducts = $this->userProductModel->getAllByUserId($userId);
 
         foreach ($userProducts as $userProduct) {
-            $productId = $userProduct['product_id'];
+            $productId = $userProduct->getProductId();
 
-            $pdo = new PDO("pgsql:host=db; port=5432; dbname=db;", username: "dbuser", password: "dbpwd");
-            $stmt = $pdo->query("SELECT * FROM products WHERE id = $productId");
-            $product = $stmt->fetch();
-            $product['amount'] = $userProduct['amount'];
+            $product = $this->productModel->getOneById($productId);
+            $totalSum = $userProduct->getAmount() * $product->getPrice();
+            $product->setSum($totalSum);
+            $userProduct->setProduct($product);
+            $sum += $userProduct->getProduct()->getSum();
 
-            $products[] = $product;
+            $products[] = $userProduct;
         }
+
         require_once '../Views/cart_page.php';
     }
 }

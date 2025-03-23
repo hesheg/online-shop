@@ -1,8 +1,17 @@
 <?php
 
+namespace Controllers;
+use Model\User;
 
 class UserController
 {
+    private User $userModel;
+
+    public function __construct()
+    {
+        $this->userModel = new User();
+    }
+
     public function getRegistrateForm()
     {
         require_once '../Views/registration_form.php';
@@ -20,9 +29,7 @@ class UserController
 
             $password = password_hash($password, PASSWORD_DEFAULT);
 
-            require_once '../Model/User.php';
-            $userModel = new User;
-            $userModel->registrate($name, $email, $password);
+            $this->userModel->create($name, $email, $password);
 
             header("Location: /login");
             exit;
@@ -53,8 +60,7 @@ class UserController
             $emailToLower = strtolower($email);
             $email = trim($emailToLower);
 
-            require_once '../Model/User.php';
-            $userModel = new User;
+            $userModel = $this->userModel;
 
             if (strlen($email) < 5) {
                 $errors['email'] = 'Количество символов в email должно быть больше 5';
@@ -63,7 +69,7 @@ class UserController
             } else {
                 $result = $userModel->getByEmail($email);
 
-                if ($result > 0) {
+                if ($result !== null) {
                     $errors['email'] = 'Пользователь с таким email уже существует';
                 }
             }
@@ -103,21 +109,19 @@ class UserController
             $username = $_POST['username'];
             $password = $_POST['password'];
 
-            require_once '../Model/User.php';
-            $userModel = new User;
+            $user = $this->userModel->getByEmail($username);
 
-            $user = $userModel->getByEmail($username);
-
-            if ($user === false) {
+            if ($user === null) {
                 $errors['username'] = 'username or password incorrect';
             } else {
-                $passwordDb = $user['password'];
+                $passwordDb = $user->getPassword();
 
                 if (password_verify($password, $passwordDb)) {
                     if (session_status() !== PHP_SESSION_ACTIVE) {
                         session_start();
                     }
-                    $_SESSION['user_id'] = $user['id'];
+
+                    $_SESSION['user_id'] = $user->getId();
                     header("Location: /profile");
                     exit;
                 } else {
@@ -157,9 +161,7 @@ class UserController
         } else {
             $userId = $_SESSION['user_id'];
 
-            require_once '../Model/User.php';
-            $userModel = new User;
-            $user = $userModel->getById($userId);
+            $user = $this->userModel->getById($userId);
 
             require_once '../Views/profile_page.php';
         }
@@ -188,16 +190,14 @@ class UserController
             $email = $_POST['email'];
             $userId = $_SESSION['user_id'];
 
-            require_once '../Model/User.php';
-            $userModel = new User;
-            $user = $userModel->getById($userId);
+            $user = $this->userModel->getById($userId);
 
-            if ($name !== $user['name']) {
-               $userModel->updateNameById($name, $userId);
+            if ($name !== $user->getName()) {
+               $this->userModel->updateNameById($name, $userId);
             }
 
-            if ($email !== $user['email']) {
-                $userModel->updateEmailById($email, $userId);
+            if ($email !== $user->getEmail()) {
+                $this->userModel->updateEmailById($email, $userId);
             }
 
             header("Location: /profile");
@@ -231,13 +231,10 @@ class UserController
             } elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
                 $errors['email'] = 'В email обязательно должны быть символы "@" и "."';
             } else {
-                require_once '../Model/User.php';
-                $userModel = new User;
-
-                $user = $userModel->getByEmail($email);
+                $user = $this->userModel->getByEmail($email);
 
                 $userId = $_SESSION['user_id'];
-                if ($user['id'] !== $userId) {
+                if ($user->getId() !== $userId) {
                     $errors['email'] = 'Пользователь с таким email уже существует';
                 }
             }
@@ -247,7 +244,6 @@ class UserController
 
     public function logout()
     {
-//        session_unset();
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }

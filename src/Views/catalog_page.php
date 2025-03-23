@@ -1,38 +1,36 @@
 <div class="container">
     <a href="/profile">Мой профиль</a>
     <a href="/cart">Корзина</a>
+    <a href="/user-order">Мои заказы</a>
     <h3>Catalog</h3>
     <div class="card-deck">
-        <?php foreach ($products as $product): ?>
             <div class="card text-center">
                 <a href="#">
                     <div class="card-header">
                         Hit!
                     </div>
-                    <img class="card-img-top" src="<?php echo $product['image_url']; ?>" alt="Card image">
+                    <?php foreach ($products as $product): ?>
+                    <img class="card-img-top" src="<?php echo $product->getImageUrl(); ?>" alt="Card image">
                     <div class="card-body">
-                        <p class="card-text text-muted"><?php echo $product['name']; ?></p>
-                        <a href="#"><h5 class="card-title"><?php echo $product['description']; ?></h5></a>
+                        <p class="card-text text-muted"><?php echo $product->getName(); ?></p>
+                        <a href="#"><h5 class="card-title"><?php echo $product->getDescription(); ?></h5></a>
                         <div class="card-footer">
-                            <?php echo $product['price'] . '$';?>
+                            <?php echo $product->getPrice() . '$';?>
                         </div>
                     </div>
                 </a>
             </div>
-
             <form action="/add-product" method="POST">
                 <div class="container">
-                    <input type="hidden" placeholder="Enter product-id" name="product-id" value="<?php echo $product['id']; ?>" id="product-id" required>
-
-                   <?php if (isset($errors['amount'])): ?> <label style="color: brown"><?php echo $errors['amount'];?></label>
-                    <?php endif;?>
-
-                    <input type="text" placeholder="Enter amount" name="amount" id="amount" required>
-
-
-                    <button type="submit" class="registerbtn">Add product</button>
+                    <input type="hidden" placeholder="Enter product-id" name="product-id" value="<?php echo $product->getId(); ?>" id="product-id" required>
+                    <button type="submit" class="registerbtn">+</button>
                 </div>
-
+            </form>
+            <form action="/decrease-product" method="POST">
+                <div class="container">
+                    <input type="hidden" placeholder="Enter product-id" name="product-id" value="<?php echo $product->getId(); ?>" id="product-id" required>
+                    <button type="submit" class="registerbtn">-</button>
+                </div>
             </form>
         <?php endforeach; ?>
     </div>
