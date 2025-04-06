@@ -36,6 +36,34 @@
                     <input type="text" name="checkout-comment" value="<?php echo $userOrder->getAddress(); ?>" id="checkout-comment" placeholder="Your comment...">
                 </div>
             </div>
+                <section class="checkout-details">
+<!--                    --><?php //foreach ($userOrders as $userOrder): ?>
+                        <?php $orderProducts = $userOrder->getOrderProducts(); ?>
+                        <?php foreach ($orderProducts as $orderProduct): ?>
+                            <div class="checkout-details-inner">
+                                <div class="checkout-lists">
+                                    <div class="card">
+                                        <div class="card-image"><img src="<?php echo $orderProduct->getProduct()->getImageUrl()?>" alt=""></div>
+                                        <div class="card-details">
+                                            <div class="card-name"><?php echo $orderProduct->getProduct()->getName(); ?></div>
+                                            <div class="card-price"><?php echo '$' . $orderProduct->getProduct()->getPrice(); ?></div>
+                                            <div class="card-wheel">
+<!--                                                <button>-</button>-->
+                                                <span><?php echo 'Количество: ' . $orderProduct->getAmount(); ?></span>
+<!--                                                <button>+</button>-->
+                                            </div>
+                                            <div class="card-price"><?php echo '$' . $orderProduct->getSum(); ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                        <div class="checkout-total">
+                            <h6>Общая стоимость заказа</h6>
+                            <p><?php echo '$' . $userOrder->getTotal(); ?></p>
+                        </div>
+<!--                    --><?php //endforeach; ?>
+                </section>
                 <br>
             <?php endforeach; ?>
             <div class="form-control-btn">
@@ -44,34 +72,7 @@
         </form>
     </section>
 
-    <section class="checkout-details">
-        <?php foreach ($userOrders as $userOrder): ?>
-        <?php $orderProducts = $userOrder->getOrderProducts(); ?>
-        <?php foreach ($orderProducts as $orderProduct): ?>
-        <div class="checkout-details-inner">
-            <div class="checkout-lists">
-                <div class="card">
-                    <div class="card-image"><img src="<?php echo $orderProduct->getProduct()->getImageUrl()?>" alt=""></div>
-                    <div class="card-details">
-                        <div class="card-name"><?php echo $orderProduct->getProduct()->getName(); ?></div>
-                        <div class="card-price"><?php echo '$' . $orderProduct->getProduct()->getPrice(); ?></div>
-                        <div class="card-wheel">
-                            <button>-</button>
-                            <span><?php echo $orderProduct->getAmount(); ?></span>
-                            <button>+</button>
-                        </div>
-                        <div class="card-price"><?php echo '$' . $orderProduct->getSum(); ?></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <?php endforeach; ?>
-            <div class="checkout-total">
-                <h6>Общая стоимость</h6>
-                <p><?php echo '$' . $userOrder->getTotal(); ?></p>
-            </div>
-        <?php endforeach; ?>
-    </section>
+
 
 </main>
 

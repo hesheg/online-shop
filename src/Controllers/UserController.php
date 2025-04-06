@@ -1,17 +1,18 @@
 <?php
 
 namespace Controllers;
+
 use Model\User;
 
-class UserController
+class UserController extends BaseController
 {
     private User $userModel;
 
     public function __construct()
     {
+        parent::__construct();
         $this->userModel = new User();
     }
-
     public function getRegistrateForm()
     {
         require_once '../Views/registration_form.php';
@@ -103,30 +104,18 @@ class UserController
 
     public function login()
     {
-        $errors = $this->validateLogin($_POST);
+        $data = $_POST;
+        $errors = $this->validateLogin($data);
 
         if (empty($errors)) {
-            $username = $_POST['username'];
-            $password = $_POST['password'];
+            $result = $this->authService->auth($data['username'], $data['password']);
 
-            $user = $this->userModel->getByEmail($username);
 
-            if ($user === null) {
-                $errors['username'] = 'username or password incorrect';
+            if ($result === true) {
+                header("Location: /profile");
+                exit;
             } else {
-                $passwordDb = $user->getPassword();
-
-                if (password_verify($password, $passwordDb)) {
-                    if (session_status() !== PHP_SESSION_ACTIVE) {
-                        session_start();
-                    }
-
-                    $_SESSION['user_id'] = $user->getId();
-                    header("Location: /profile");
-                    exit;
-                } else {
-                    $errors['username'] = 'username or password incorrect';
-                }
+                $errors['username'] = 'username or password incorrect';
             }
         }
         return require_once '../Views/login_form.php';
@@ -151,19 +140,15 @@ class UserController
 
     public function profile()
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
+        if ($this->authService->check()) {
+            $user = $this->authService->getCurrentUser();
 
-        if (!isset($_SESSION['user_id'])) {
-            header("Location: /login");
-            exit;
-        } else {
-            $userId = $_SESSION['user_id'];
-
-            $user = $this->userModel->getById($userId);
+            $user = $this->userModel->getById($user->getId());
 
             require_once '../Views/profile_page.php';
+        } else {
+            header("Location: /login");
+            exit;
         }
     }
 
@@ -174,11 +159,7 @@ class UserController
 
     public function editProfile()
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
-        if (!isset($_SESSION['user_id'])) {
+        if (!$this->authService->check()) {
             header('Location: /login');
             exit;
         }
@@ -188,16 +169,16 @@ class UserController
         if (empty($errors)) {
             $name = $_POST['name'];
             $email = $_POST['email'];
-            $userId = $_SESSION['user_id'];
+            $user = $this->authService->getCurrentUser();
 
-            $user = $this->userModel->getById($userId);
+            $user = $this->userModel->getById($user->getId());
 
             if ($name !== $user->getName()) {
-               $this->userModel->updateNameById($name, $userId);
+                $this->userModel->updateNameById($name, $user->getId());
             }
 
             if ($email !== $user->getEmail()) {
-                $this->userModel->updateEmailById($email, $userId);
+                $this->userModel->updateEmailById($email, $user->getId());
             }
 
             header("Location: /profile");
@@ -231,10 +212,10 @@ class UserController
             } elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
                 $errors['email'] = 'В email обязательно должны быть символы "@" и "."';
             } else {
-                $user = $this->userModel->getByEmail($email);
+                $userDb = $this->userModel->getByEmail($email);
 
-                $userId = $_SESSION['user_id'];
-                if ($user->getId() !== $userId) {
+                $user = $this->authService->getCurrentUser();
+                if ($userDb->getId() !== $user->getId()) {
                     $errors['email'] = 'Пользователь с таким email уже существует';
                 }
             }
@@ -244,11 +225,8 @@ class UserController
 
     public function logout()
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
+        $this->authService->logout();
 
-        session_destroy();
         header("Location: /login");
         exit;
     }

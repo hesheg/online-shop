@@ -13,6 +13,12 @@ class Order extends Model
     private int $total;
     private array $orderProducts;
 
+
+    protected function getTableName(): string
+    {
+        return 'orders';
+    }
+
     private function createObj(array|false $user): self|null
     {
         if (!$user) {
@@ -38,7 +44,7 @@ class Order extends Model
         int $userId
     ){
        $stmt = $this->pdo->prepare(
-           "INSERT INTO orders (contact_name, contact_phone, comment, user_id, address) 
+           "INSERT INTO {$this->getTableName()} (contact_name, contact_phone, comment, user_id, address) 
                     VALUES (:name, :phone, :comment, :user_id, :address) RETURNING  id"
        );
        $stmt->execute([
@@ -55,7 +61,12 @@ class Order extends Model
 
     public function getAllByUserId(int $userId): array|null
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM orders WHERE user_id = :user_id");
+        $stmt = $this->pdo->prepare(
+            "SELECT * FROM {$this->getTableName()} 
+         WHERE user_id = :user_id 
+         ORDER BY id DESC"
+        );
+
         $stmt->execute(['user_id' => $userId]);
         $orders = $stmt->fetchAll();
 

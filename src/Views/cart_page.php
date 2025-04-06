@@ -8,7 +8,7 @@
                 Итоговая стоимость:
             </p>
             <p class="price-amount">
-                <?php echo $sum; ?>
+                <?php echo '$' . $sum; ?>
             </p>
         </div>
     </div>
@@ -21,13 +21,28 @@
             <div class="item-info">
                 <h3 class="item-title"><?php echo $product->getProduct()->getName(); ?></h3>
                 <p class="price-amount"><?php echo '$' . $product->getProduct()->getPrice(); ?></p>
+                <?php $res = $product->getProduct(); ?>
+                <form action="/add-product" method="POST">
+                    <div class="container">
+                        <input type="hidden" placeholder="Enter product_id" name="product_id" value="<?php echo $res->getId(); ?>" id="product_id" required>
+                        <button type="submit" class="registerbtn">+</button>
+                    </div>
+                    <div>
+                        <input type="hidden" placeholder="Enter amount" name="amount" value="1" id="amount" required>
+                    </div>
+                </form>
                 <?php echo 'Количество: ' . $product->getAmount(); ?>
+                <form action="/decrease-product" method="POST">
+                    <div class="container">
+                        <input type="hidden" placeholder="Enter product_id" name="product_id" value="<?php echo $res->getId(); ?>" id="product_id" required>
+                        <input type="hidden" placeholder="Enter amount" name="amount" value="1" id="amount" required>
+                        <button type="submit" class="registerbtn">-</button>
+                    </div>
+                </form>
             </div>
         </div>
         <?php endforeach; ?>
     </div>
-<!--    <div class="navigate">-->
-<!--        <button class="button button-back"><i class="fa fa-angle-left"></i></button>-->
         <button class="button button-pay"><a href="/create-order">Оформить заказ</a></button>
 
 

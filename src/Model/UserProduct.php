@@ -12,6 +12,11 @@ class UserProduct extends Model
     private int $totalSum;
 
 
+    protected function getTableName(): string
+    {
+        return 'user_products';
+    }
+
     private function createObj(array|false $user): self|null
     {
         if (!$user) {
@@ -30,7 +35,7 @@ class UserProduct extends Model
 
     public function getAllByUserId(int $userId): array|null
     {
-        $stmt = $this->pdo->query("SELECT * FROM user_products WHERE user_id = {$userId}");
+        $stmt = $this->pdo->query("SELECT * FROM {$this->getTableName()} WHERE user_id = {$userId}");
         $userProducts = $stmt->fetchAll();
 
         $result = [];
@@ -44,13 +49,19 @@ class UserProduct extends Model
 
     public function deleteByUserId(int $userId)
     {
-       $stmt = $this->pdo->prepare("DELETE FROM user_products WHERE user_id = :userId");
+       $stmt = $this->pdo->prepare("DELETE FROM {$this->getTableName()} WHERE user_id = :userId");
        $stmt->execute(['userId' => $userId]);
+    }
+
+    public function deleteByUserIdAndProdId(int $userId, int $productId)
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM {$this->getTableName()} WHERE user_id = :userId and product_id = :productId");
+        $stmt->execute(['userId' => $userId, 'productId' => $productId]);
     }
 
     public function getByProdIdAndUserId(int $productId, int $userId): self|null
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM user_products WHERE product_id = :productId and user_id = :userId");
+        $stmt = $this->pdo->prepare("SELECT * FROM {$this->getTableName()} WHERE product_id = :productId and user_id = :userId");
         $stmt->execute(['productId' => $productId, 'userId' => $userId]);
         $user = $stmt->fetch();
 
@@ -59,13 +70,13 @@ class UserProduct extends Model
 
     public function insertProducts(int $userId, int $productId, int $amount)
     {
-        $stmt = $this->pdo->prepare("INSERT INTO user_products (user_id, product_id, amount) VALUES (:userId, :productId, :amount)");
+        $stmt = $this->pdo->prepare("INSERT INTO {$this->getTableName()} (user_id, product_id, amount) VALUES (:userId, :productId, :amount)");
         $stmt->execute(['userId' => $userId, 'productId' => $productId, 'amount' => $amount]);
     }
 
     public function updateProducts(int $amount, int $userId, int $productId)
     {
-        $stmt = $this->pdo->prepare("UPDATE user_products SET amount = :amount WHERE user_id = :userId and product_id = :productId");
+        $stmt = $this->pdo->prepare("UPDATE {$this->getTableName()} SET amount = :amount WHERE user_id = :userId and product_id = :productId");
         $stmt->execute(['amount' => $amount, 'userId' => $userId, 'productId' => $productId]);
     }
 

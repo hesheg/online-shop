@@ -7,7 +7,7 @@ use Model\OrderProduct;
 use Model\Product;
 use Model\UserProduct;
 
-class OrderController
+class OrderController extends BaseController
 {
     private Product $productModel;
     private OrderProduct $orderProductModel;
@@ -16,6 +16,7 @@ class OrderController
 
     public function __construct()
     {
+        parent::__construct();
         $this->productModel = new Product();
         $this->orderProductModel = new OrderProduct();
         $this->userProductModel = new UserProduct();
@@ -30,24 +31,20 @@ class OrderController
 
     public function getAllOrders()
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
-        if (!isset($_SESSION['user_id'])) {
+        if (!$this->authService->check()) {
             header("Location: /login");
             exit;
         }
 
-        $userId = $_SESSION['user_id'];
-        $userOrders = $this->orderModel->getAllByUserId($userId);
+        $user = $this->authService->getCurrentUser();
+        $userOrders = $this->orderModel->getAllByUserId($user->getId());
 
         if (empty($userOrders)) {
             echo 'Вы еще не совершили первый заказ';
         }
 
-        $newUserOrders = [];
-        $newOrderProducts = [];
+//        $newUserOrders = [];
+//        $newOrderProducts = [];
         $total = 0;
         foreach ($userOrders as $userOrder) {
             $orderId = $userOrder->getId();
@@ -85,11 +82,7 @@ class OrderController
 
     public function handleCheckout()
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
-        if (!isset($_SESSION['user_id'])) {
+        if (!$this->authService->check()) {
             header("Location: /login");
             exit();
         }
@@ -101,11 +94,11 @@ class OrderController
             $contactPhone = $_POST['contact_phone'];
             $address = $_POST['address'];
             $comment = $_POST['comment'];
-            $userId = $_SESSION['user_id'];
+            $user = $this->authService->getCurrentUser();
 
-            $orderId = $this->orderModel->create($contactName, $contactPhone, $address, $comment, $userId);
+            $orderId = $this->orderModel->create($contactName, $contactPhone, $address, $comment, $user->getId());
 
-            $userProducts = $this->userProductModel->getAllByUserId($userId);
+            $userProducts = $this->userProductModel->getAllByUserId($user->getId());
 
             foreach ($userProducts as $userProduct) {
                 $productId = $userProduct->getProductId();
@@ -114,7 +107,7 @@ class OrderController
                 $this->orderProductModel->create($orderId, $productId, $amount);
             }
 
-            $this->userProductModel->deleteByUserId($userId);
+            $this->userProductModel->deleteByUserId($user->getId());
 
             header("Location: /user-order");
             exit;
@@ -155,11 +148,10 @@ class OrderController
 
 
         if (empty($data['address'])) {
-            $errors['address'] = 'Введите адрес';
+            $errors['address'] = 'Введите адрес доставки';
         } else {
             $address = $_POST['address'];
         }
-
 
         return $errors;
     }

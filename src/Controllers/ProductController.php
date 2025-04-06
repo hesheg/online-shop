@@ -3,17 +3,19 @@
 namespace Controllers;
 
 use Model\Product;
-use Model\UserProduct;
+use Service\CartService;
 
-class ProductController
+class ProductController extends BaseController
 {
     private Product $productModel;
-    private UserProduct $userProductModel;
+    private CartService $cartService;
 
     public function __construct()
     {
+        parent::__construct();
         $this->productModel = new Product();
-        $this->userProductModel = new UserProduct();
+        $this->cartService = new CartService();
+
     }
 
     public function getCatalogPage()
@@ -23,80 +25,55 @@ class ProductController
 
     public function getCatalog()
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
-        if (!isset($_SESSION['user_id'])) {
+        if (!$this->authService->check()) {
             header("Location: /login");
             exit;
         }
 
         $products = $this->productModel->getAll();
 
+
         require_once '../Views/catalog_page.php';
     }
 
     public function addProduct()
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
-        if (!isset($_SESSION['user_id'])) {
+        if (!$this->authService->check()) {
             header("Location: /login");
             exit;
         }
 
-        $errors = $this->validateAddProduct($_POST);
+        $data = $_POST;
+        $user = $this->authService->getCurrentUser();
+        $errors = $this->validateAddProduct($data);
 
         if (empty($errors)) {
-            $userId = $_SESSION['user_id'];
-            $productId = $_POST['product-id'];
-            $amount = 1;
-            $result = $this->userProductModel->getByProdIdAndUserId($productId, $userId);
-
-            if ($result === null) {
-                $this->userProductModel->insertProducts($userId, $productId, $amount);
-            } else {
-                $amount += $result->getAmount();
-
-                $this->userProductModel->updateProducts($amount, $userId, $productId);
-            }
-
+            $this->cartService->addProduct($data['product_id'], $user->getId(), $data['amount']);
             header("Location: /catalog");
+        } else {
+            print_r($errors);
+            exit;
         }
     }
 
 
     public function decreaseProduct()
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
-        if (!isset($_SESSION['user_id'])) {
+        if (!$this->authService->check()) {
             header("Location: /login");
             exit;
         }
 
-        $errors = $this->validateAddProduct($_POST);
+        $data = $_POST;
+        $user = $this->authService->getCurrentUser();
+        $errors = $this->validateAddProduct($data);
 
         if (empty($errors)) {
-            $userId = $_SESSION['user_id'];
-            $productId = $_POST['product-id'];
-            $result = $this->userProductModel->getByProdIdAndUserId($productId, $userId);
-
-            if ($result !== null) {
-                if ($result->getAmount() === 1) {
-                    $result->deleteByUserId($userId);
-                }
-                $amount = $result->getAmount() - 1;
-
-                $this->userProductModel->updateProducts($amount, $userId, $productId);
-            }
-
+            $this->cartService->decreaseProduct($data['product_id'], $user->getId(), $data['amount']);
             header("Location: /catalog");
+        } else {
+            print_r($errors);
+            exit;
         }
     }
 
@@ -104,21 +81,17 @@ class ProductController
     {
         $errors = [];
 
-        if (isset($data['product-id'])) {
-            $productId = (int)$data['product-id'];
+        if (isset($data['product_id'])) {
+            $productId = $data['product_id'];
 
-            $data = $this->productModel->getOneById($productId);
+            $product = $this->productModel->getOneById($productId);
 
-            if ($data === null) {
-                $errors['product-id'] = 'Продукт не найден';
+            if ($product === null) {
+                $errors['product_id'] = 'Продукт не найден';
             }
         } else {
-            $errors['product-id'] = 'id продукта должен быть указан';
+            $errors['product_id'] = 'id продукта должен быть указан';
         }
-
-//        if (!isset($data['amount'])) {
-//            $errors['amount'] = 'Укажите количество добавляемого продукта';
-//        }
 
         return $errors;
     }

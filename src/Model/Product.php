@@ -10,6 +10,13 @@ class Product extends Model
     private int $price;
     private string $image_url;
     private int $sum;
+    private int $amount;
+
+
+    protected function getTableName(): string
+    {
+        return 'products';
+    }
 
     private function createObj(array|false $user): self|null
     {
@@ -29,7 +36,7 @@ class Product extends Model
 
     public function getAll(): array|false
     {
-        $stmt = $this->pdo->query('SELECT * FROM products');
+        $stmt = $this->pdo->query("SELECT * FROM {$this->getTableName()}");
         $products = $stmt->fetchAll();
 
         $result = [];
@@ -43,33 +50,23 @@ class Product extends Model
 
     public function getOneById(int $productId): self|null
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM products WHERE id = :productId");
+        $stmt = $this->pdo->prepare("SELECT * FROM {$this->getTableName()} WHERE id = :productId");
         $stmt->execute(['productId' => $productId]);
         $product = $stmt->fetch();
 
         return $this->createObj($product);
     }
 
-    //    public function getById($userProducts): array|null
-//    {
-//        $products = [];
-//        $result = [];
-//
-//        foreach ($userProducts as $userProduct) {
-//            $productId = $userProduct['product_id'];
-//            $stmt = $this->pdo->query("SELECT * FROM products WHERE id = $productId");
-//            $product = $stmt->fetch();
-//            $product['amount'] = $userProduct['amount'];
-//            $products[] = $product;
-//
-//            foreach ($products as $product) {
-//                $obj = $this->createObj($product);
-//                $result[] = $obj;
-//            }
-//        }
-//        return $result;
-//    }
 
+    public function getAmount(): int
+    {
+        return $this->amount;
+    }
+
+    public function setAmount(int $amount): void
+    {
+        $this->amount = $amount;
+    }
     public function getSum(): int
     {
         return $this->sum;

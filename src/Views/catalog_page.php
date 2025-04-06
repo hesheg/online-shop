@@ -22,14 +22,20 @@
             </div>
             <form action="/add-product" method="POST">
                 <div class="container">
-                    <input type="hidden" placeholder="Enter product-id" name="product-id" value="<?php echo $product->getId(); ?>" id="product-id" required>
+                    <input type="hidden" placeholder="Enter product_id" name="product_id" value="<?php echo $product->getId(); ?>" id="product_id" required>
                     <button type="submit" class="registerbtn">+</button>
+                </div>
+                <div class="container">
+                    <input type="hidden" placeholder="Enter amount" name="amount" value="1" id="amount" required>
                 </div>
             </form>
             <form action="/decrease-product" method="POST">
                 <div class="container">
-                    <input type="hidden" placeholder="Enter product-id" name="product-id" value="<?php echo $product->getId(); ?>" id="product-id" required>
+                    <input type="hidden" placeholder="Enter product_id" name="product_id" value="<?php echo $product->getId(); ?>" id="product_id" required>
                     <button type="submit" class="registerbtn">-</button>
+                </div>
+                <div class="container">
+                    <input type="hidden" placeholder="Enter amount" name="amount" value="1" id="amount" required>
                 </div>
             </form>
         <?php endforeach; ?>
