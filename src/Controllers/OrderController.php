@@ -2,10 +2,12 @@
 
 namespace Controllers;
 
+use DTO\OrderCreateDTO;
 use Model\Order;
 use Model\OrderProduct;
 use Model\Product;
 use Model\UserProduct;
+use Service\OrderService;
 
 class OrderController extends BaseController
 {
@@ -13,6 +15,7 @@ class OrderController extends BaseController
     private OrderProduct $orderProductModel;
     private UserProduct $userProductModel;
     private Order $orderModel;
+    private OrderService $orderService;
 
     public function __construct()
     {
@@ -21,6 +24,7 @@ class OrderController extends BaseController
         $this->orderProductModel = new OrderProduct();
         $this->userProductModel = new UserProduct();
         $this->orderModel = new Order();
+        $this->orderService = new OrderService();
     }
 
 
@@ -80,35 +84,28 @@ class OrderController extends BaseController
         require_once '../Views/order_form.php';
     }
 
-    public function handleCheckout()
+    public function handleCheckout(array $data)
     {
         if (!$this->authService->check()) {
             header("Location: /login");
             exit();
         }
 
-        $errors = $this->validate($_POST);
+        $errors = $this->validate($data);
+        $user = $this->authService->getCurrentUser();
+//        var_dump($user); die;
+
 
         if (empty($errors)) {
-            $contactName = $_POST['contact_name'];
-            $contactPhone = $_POST['contact_phone'];
-            $address = $_POST['address'];
-            $comment = $_POST['comment'];
-            $user = $this->authService->getCurrentUser();
+            $dto = new OrderCreateDTO(
+                $data['contact_name'],
+                $data['phone'],
+                $data['comment'],
+                $data['address'],
+                $user
+            );
 
-            $orderId = $this->orderModel->create($contactName, $contactPhone, $address, $comment, $user->getId());
-
-            $userProducts = $this->userProductModel->getAllByUserId($user->getId());
-
-            foreach ($userProducts as $userProduct) {
-                $productId = $userProduct->getProductId();
-                $amount = $userProduct->getAmount();
-
-                $this->orderProductModel->create($orderId, $productId, $amount);
-            }
-
-            $this->userProductModel->deleteByUserId($user->getId());
-
+            $this->orderService->create($dto);
             header("Location: /user-order");
             exit;
         } else {
@@ -149,10 +146,7 @@ class OrderController extends BaseController
 
         if (empty($data['address'])) {
             $errors['address'] = 'Введите адрес доставки';
-        } else {
-            $address = $_POST['address'];
         }
-
         return $errors;
     }
 }

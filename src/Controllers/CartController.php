@@ -3,18 +3,62 @@
 namespace Controllers;
 use Model\Product;
 use Model\UserProduct;
+use Request\AddProductRequest;
+use Request\DecreaseProductRequest;
+use Service\CartService;
 
 class CartController extends BaseController
 {
     private UserProduct $userProductModel;
     private Product $productModel;
+    private CartService $cartService;
 
     public function __construct()
     {
         parent::__construct();
         $this->userProductModel = new UserProduct();
         $this->productModel = new Product();
+        $this->cartService = new CartService();
     }
+
+    public function addProduct(AddProductRequest $request)
+    {
+        if (!$this->authService->check()) {
+            header("Location: /login");
+            exit;
+        }
+
+        $user = $this->authService->getCurrentUser();
+        $errors = $request->validate();
+
+        if (empty($errors)) {
+            $this->cartService->addProduct($request->getProductId(), $user->getId(), $request->getAmount());
+            header("Location: /catalog");
+        } else {
+            print_r($errors);
+            exit;
+        }
+    }
+
+    public function decreaseProduct(DecreaseProductRequest $request)
+    {
+        if (!$this->authService->check()) {
+            header("Location: /login");
+            exit;
+        }
+
+        $user = $this->authService->getCurrentUser();
+        $errors = $request->validate();
+
+        if (empty($errors)) {
+            $this->cartService->decreaseProduct($request->getProductId(), $user->getId(), $request->getAmount());
+            header("Location: /catalog");
+        } else {
+            print_r($errors);
+            exit;
+        }
+    }
+
     public function cart()
     {
         if (!$this->authService->check()) {
