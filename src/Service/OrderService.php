@@ -12,6 +12,7 @@ class OrderService
     private Order $orderModel;
     private OrderProduct $orderProductModel;
     private UserProduct $userProductModel;
+    private AuthService $authService;
 
 
     public function __construct()
@@ -19,17 +20,20 @@ class OrderService
         $this->orderModel = new Order();
         $this->orderProductModel = new OrderProduct();
         $this->userProductModel = new UserProduct();
+        $this->authService = new AuthService();
     }
 
     public function create(OrderCreateDTO $data)
     {
-        $userProducts = $this->userProductModel->getAllByUserId($data->getUser()->getId());
+        $user = $this->authService->getCurrentUser();
+        $userProducts = $this->userProductModel->getAllByUserId($user->getId());
+
         $orderId = $this->orderModel->create(
             $data->getName(),
             $data->getPhone(),
             $data->getComment(),
             $data->getAddress(),
-            $data->getUser()->getId()
+            $user->getId()
         );
 
         foreach ($userProducts as $userProduct) {
@@ -39,6 +43,6 @@ class OrderService
                 $this->orderProductModel->create($orderId, $productId, $amount);
             }
 
-            $this->userProductModel->deleteByUserId($data->getUser()->getId());
+            $this->userProductModel->deleteByUserId($user->getId());
     }
 }

@@ -11,17 +11,19 @@
                 <?php echo '$' . $sum; ?>
             </p>
         </div>
+
     </div>
     <div class="cart-list">
-        <?php foreach ($products as $product): ?>
+        <?php foreach ($userProducts as $userProduct): ?>
+<!--        --><?php //echo $product->getTotalSum(); ?>
         <div class="cart-item">
             <div class="item-image">
-                <img src='<?php echo $product->getProduct()->getImageUrl(); ?>' alt="">
+                <img src='<?php echo $userProduct->getProduct()->getImageUrl(); ?>' alt="">
             </div>
             <div class="item-info">
-                <h3 class="item-title"><?php echo $product->getProduct()->getName(); ?></h3>
-                <p class="price-amount"><?php echo '$' . $product->getProduct()->getPrice(); ?></p>
-                <?php $res = $product->getProduct(); ?>
+                <h3 class="item-title"><?php echo $userProduct->getProduct()->getName(); ?></h3>
+                <p class="price-amount"><?php echo '$' . $userProduct->getProduct()->getPrice(); ?></p>
+                <?php $res = $userProduct->getProduct(); ?>
                 <form action="/add-product" method="POST">
                     <div class="container">
                         <input type="hidden" placeholder="Enter product_id" name="product_id" value="<?php echo $res->getId(); ?>" id="product_id" required>
@@ -31,7 +33,7 @@
                         <input type="hidden" placeholder="Enter amount" name="amount" value="1" id="amount" required>
                     </div>
                 </form>
-                <?php echo 'Количество: ' . $product->getAmount(); ?>
+                <?php echo 'Количество: ' . $userProduct->getAmount(); ?>
                 <form action="/decrease-product" method="POST">
                     <div class="container">
                         <input type="hidden" placeholder="Enter product_id" name="product_id" value="<?php echo $res->getId(); ?>" id="product_id" required>
@@ -43,10 +45,9 @@
         </div>
         <?php endforeach; ?>
     </div>
+    <?php if ($sum > 0): ?>
         <button class="button button-pay"><a href="/create-order">Оформить заказ</a></button>
-
-
-<!--    </div>-->
+    <?php endif; ?>
 </div>
 
 <style>

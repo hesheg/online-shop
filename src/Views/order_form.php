@@ -36,16 +36,6 @@
                 <?php echo $errors['address']; ?></label>
             <?php endif; ?>
         </div>
-<!--        <div class="row">-->
-<!--            <div class="col2">-->
-<!--                <input type="text" name="city">-->
-<!--                <label for="city">City</label>-->
-<!--            </div>-->
-<!--            <div class="col2">-->
-<!--                <input type="text" name="country">-->
-<!--                <label for="country">Country</label>-->
-<!--            </div>-->
-<!--        </div>-->
         <div class="row">
             <input type="text" name="comment" id="comment">
             <label for="lineone">comment</label>

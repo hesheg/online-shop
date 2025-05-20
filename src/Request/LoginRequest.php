@@ -2,17 +2,22 @@
 
 namespace Request;
 
-use Model\User;
 
 class LoginRequest
 {
-    private User $userModel;
-
     public function __construct(private array $data)
     {
-        $this->userModel = new User();
     }
 
+    public function getEmail()
+    {
+        return $this->data['username'];
+    }
+
+    public function getPassword()
+    {
+        return $this->data['password'];
+    }
 
     public function validate(): array
     {

@@ -1,23 +1,19 @@
 <?php
 
 namespace Controllers;
-use Model\Product;
-use Model\UserProduct;
+use DTO\AddProductDTO;
+use DTO\DecreaseProductDTO;
 use Request\AddProductRequest;
 use Request\DecreaseProductRequest;
 use Service\CartService;
 
 class CartController extends BaseController
 {
-    private UserProduct $userProductModel;
-    private Product $productModel;
     private CartService $cartService;
 
     public function __construct()
     {
         parent::__construct();
-        $this->userProductModel = new UserProduct();
-        $this->productModel = new Product();
         $this->cartService = new CartService();
     }
 
@@ -28,12 +24,13 @@ class CartController extends BaseController
             exit;
         }
 
-        $user = $this->authService->getCurrentUser();
         $errors = $request->validate();
 
         if (empty($errors)) {
-            $this->cartService->addProduct($request->getProductId(), $user->getId(), $request->getAmount());
-            header("Location: /catalog");
+            $dto = new AddProductDTO($request->getProductId(), $request->getAmount());
+            $this->cartService->addProduct($dto);
+//            header("Location: /catalog");
+            header('Location: ' . $_SERVER['HTTP_REFERER']);
         } else {
             print_r($errors);
             exit;
@@ -47,12 +44,13 @@ class CartController extends BaseController
             exit;
         }
 
-        $user = $this->authService->getCurrentUser();
         $errors = $request->validate();
 
         if (empty($errors)) {
-            $this->cartService->decreaseProduct($request->getProductId(), $user->getId(), $request->getAmount());
-            header("Location: /catalog");
+            $dto = new DecreaseProductDTO($request->getProductId());
+            $this->cartService->decreaseProduct($dto);
+//            header("Location: /catalog");
+            header('Location: ' . $_SERVER['HTTP_REFERER']);
         } else {
             print_r($errors);
             exit;
@@ -65,24 +63,8 @@ class CartController extends BaseController
             header("Location: /login");
             exit;
         }
-
-        $products = [];
-        $sum = 0;
-        $user = $this->authService->getCurrentUser();
-        $userProducts = $this->userProductModel->getAllByUserId($user->getId());
-
-        foreach ($userProducts as $userProduct) {
-            $productId = $userProduct->getProductId();
-
-            $product = $this->productModel->getOneById($productId);
-            $totalSum = $userProduct->getAmount() * $product->getPrice();
-            $product->setSum($totalSum);
-            $userProduct->setProduct($product);
-            $sum += $userProduct->getProduct()->getSum();
-
-            $products[] = $userProduct;
-        }
-
+        $userProducts = $this->cartService->getUserProducts();
+        $sum = $this->cartService->getSum();
 
         require_once '../Views/cart_page.php';
     }

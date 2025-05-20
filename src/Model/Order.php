@@ -41,22 +41,23 @@ class Order extends Model
         string $contactPhone,
         string $address,
         string $comment,
-        int $userId
-    ){
-       $stmt = $this->pdo->prepare(
-           "INSERT INTO {$this->getTableName()} (contact_name, contact_phone, comment, user_id, address) 
+        int    $userId
+    )
+    {
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO {$this->getTableName()} (contact_name, contact_phone, comment, user_id, address) 
                     VALUES (:name, :phone, :comment, :user_id, :address) RETURNING  id"
-       );
-       $stmt->execute([
-           'name' => $contactName,
-           'phone' => $contactPhone,
-           'comment' => $comment,
-           'address' => $address,
-           'user_id' => $userId
-       ]);
+        );
+        $stmt->execute([
+            'name' => $contactName,
+            'phone' => $contactPhone,
+            'comment' => $comment,
+            'address' => $address,
+            'user_id' => $userId
+        ]);
 
-       $data = $stmt->fetch();
-       return $data['id'];
+        $data = $stmt->fetch();
+        return $data['id'];
     }
 
     public function getAllByUserId(int $userId): array|null

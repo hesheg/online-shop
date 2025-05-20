@@ -2,8 +2,6 @@
 
 namespace DTO;
 
-use Model\User;
-
 class AuthDTO
 {
     public function __construct(
@@ -21,6 +19,5 @@ class AuthDTO
     {
         return $this->password;
     }
-
 
 }

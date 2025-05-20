@@ -6,7 +6,6 @@ class App
 {
     private array $routes = [];
 
-
     public function run()
     {
         $requestUri = $_SERVER['REQUEST_URI'];

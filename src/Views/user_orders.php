@@ -1,3 +1,8 @@
+<ul>
+    <li><a href="/profile">Мой профиль</a></li>
+    <li><a href="/catalog">Каталог</a></li>
+    <li><a href="/cart">Корзина</a></li>
+</ul>
 <header>
     <h3>Ваши заказы</h3>
 </header>
@@ -52,6 +57,7 @@
                                                 <span><?php echo 'Количество: ' . $orderProduct->getAmount(); ?></span>
 <!--                                                <button>+</button>-->
                                             </div>
+<!--                                            --><?php //if ($orderProduct->getSum() <= 0): ?>
                                             <div class="card-price"><?php echo '$' . $orderProduct->getSum(); ?></div>
                                         </div>
                                     </div>
@@ -66,9 +72,6 @@
                 </section>
                 <br>
             <?php endforeach; ?>
-            <div class="form-control-btn">
-                <button>Каталог товаров</button>
-            </div>
         </form>
     </section>
 
