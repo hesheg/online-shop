@@ -14,10 +14,10 @@ class Review extends Model
     private User $user;
 
 
-    public function create(int $userId, int $productId, int $rating, string $comment, string $created_at)
+    public static function create(int $userId, int $productId, int $rating, string $comment, string $created_at)
     {
-        $stmt = $this->pdo->prepare(
-            "INSERT INTO {$this->getTableName()} 
+        $stmt = static::getPDO()->prepare(
+            "INSERT INTO reviews 
                     (user_id, product_id, rating, comment, created_at) 
                     VALUES (:user_id, :product_id, :rating, :comment, :created_at)");
 
@@ -30,34 +30,34 @@ class Review extends Model
         ]);
     }
 
-    public function getAllByProdId($productId): array|false
+    public static function getAllByProdId($productId): array|false
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM {$this->getTableName()} WHERE product_id = :product_id ORDER BY created_at DESC");
+        $stmt = static::getPDO()->prepare("SELECT * FROM reviews WHERE product_id = :product_id ORDER BY created_at DESC");
         $stmt->execute(['product_id' => $productId]);
         $reviews = $stmt->fetchAll();
 
         $result = [];
         foreach ($reviews as $review) {
-            $obj = $this->createObj($review);
+            $obj = static::createObj($review);
             $result[] = $obj;
         }
 
         return $result;
     }
 
-    private function createObj(array|false $user): self|null
+    public static function createObj(array|false $review): self|null
     {
-        if (!$user) {
+        if (!$review) {
             return null;
         }
 
         $obj = new self();
-        $obj->id = $user['id'];
-        $obj->userId = $user['user_id'];
-        $obj->productId = $user['product_id'];
-        $obj->rating = $user['rating'];
-        $obj->comment = $user['comment'];
-        $obj->createdAt = $user['created_at'];
+        $obj->id = $review['id'];
+        $obj->userId = $review['user_id'];
+        $obj->productId = $review['product_id'];
+        $obj->rating = $review['rating'];
+        $obj->comment = $review['comment'];
+        $obj->createdAt = $review['created_at'];
 
         return $obj;
     }
@@ -102,40 +102,4 @@ class Review extends Model
     {
         return $this->createdAt;
     }
-
-
-    protected function getTableName(): string
-    {
-        return 'reviews';
-    }
-
-//    public function getId(): int
-//    {
-//        return $this->data['id'];
-//    }
-//
-//    public function getUserId(): int
-//    {
-//        return $this->data['user_id'];
-//    }
-//
-//    public function getProductId(): int
-//    {
-//        return $this->data['product_id'];
-//    }
-//
-//    public function getRating(): int
-//    {
-//        return $this->data['rating'];
-//    }
-//
-//    public function getComment(): string
-//    {
-//        return $this->data['comment'];
-//    }
-//
-//    public function getCreatedAt(): string
-//    {
-//        return $this->data['created_at'];
-//    }
 }

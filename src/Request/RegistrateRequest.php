@@ -59,7 +59,7 @@ class RegistrateRequest
             } elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
                 $errors['email'] = 'В email обязательно должны быть символы "@" и "."';
             } else {
-                $result = $userModel->getByEmail($email);
+                $result = User::getByEmail($email);
 
                 if ($result !== null) {
                     $errors['email'] = 'Пользователь с таким email уже существует';

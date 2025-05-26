@@ -14,22 +14,12 @@ use Service\ReviewService;
 
 class ProductController extends BaseController
 {
-    private Product $productModel;
-    private Review $reviewModel;
-    private User $userModel;
-    private Order $orderModel;
-    private OrderProduct $orderProductModel;
     private ReviewService $reviewService;
 
 
     public function __construct()
     {
         parent::__construct();
-        $this->productModel = new Product();
-        $this->reviewModel = new Review();
-        $this->userModel = new User();
-        $this->orderModel = new Order();
-        $this->orderProductModel = new OrderProduct();
         $this->reviewService = new ReviewService();
     }
 
@@ -44,7 +34,7 @@ class ProductController extends BaseController
             header("Location: /login");
             exit;
         }
-        $products = $this->productModel->getAll();
+        $products = Product::getAll();
 
         require_once '../Views/catalog_page.php';
     }
@@ -82,10 +72,10 @@ class ProductController extends BaseController
             exit();
         }
         $user = $this->authService->getCurrentUser();
-        $userOrders = $this->orderModel->getAllByUserId($user->getId());
+        $userOrders = Order::getAllByUserId($user->getId());
 
-        $product = $this->productModel->getOneById($request->getProductId());
-        $reviews = $this->reviewModel->getAllByProdId($request->getProductId());
+        $product = Product::getOneById($request->getProductId());
+        $reviews = Review::getAllByProdId($request->getProductId());
 
         $ratingTotal = 0;
         $count = 0;
@@ -97,7 +87,7 @@ class ProductController extends BaseController
             $rating = 0;
 
             foreach ($reviews as $review) {
-                $review->setUser($this->userModel->getById($review->getUserId()));
+                $review->setUser(User::getById($review->getUserId()));
                 $rating += $review->getRating();
                 $ratingTotal = round($rating / $count, 1);
             }
@@ -106,7 +96,7 @@ class ProductController extends BaseController
         $result = false;
 
         foreach ($userOrders as $userOrder) {
-            $orderProducts = $this->orderProductModel->getAllByOrderId($userOrder->getId());
+            $orderProducts = OrderProduct::getAllByOrderIdWithProducts($userOrder->getId());
             foreach ($orderProducts as $orderProduct) {
                 if ($orderProduct->getProductId() === $product->getId()) {
                     $result = true;

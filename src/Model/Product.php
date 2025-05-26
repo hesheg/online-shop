@@ -13,48 +13,44 @@ class Product extends Model
     private int $amount;
 
 
-    protected function getTableName(): string
+    public static function createObj(array|false $product): self|null
     {
-        return 'products';
-    }
-
-    private function createObj(array|false $user): self|null
-    {
-        if (!$user) {
+        if (!$product) {
             return null;
         }
 
         $obj = new self();
-        $obj->id = $user['id'];
-        $obj->name = $user['name'];
-        $obj->price = $user['price'];
-        $obj->description = $user['description'];
-        $obj->image_url = $user['image_url'];
+
+        $obj->id = $product['id'];
+        $obj->name = $product['name'];
+        $obj->price = $product['price'];
+        $obj->description = $product['description'];
+        $obj->image_url = $product['image_url'];
 
         return $obj;
     }
 
-    public function getAll(): array|false
+    public static function getAll(): array|false
     {
-        $stmt = $this->pdo->query("SELECT * FROM {$this->getTableName()}");
+        $stmt = static::getPDO()->query("SELECT * FROM products");
         $products = $stmt->fetchAll();
 
         $result = [];
         foreach ($products as $product) {
-            $obj = $this->createObj($product);
+            $obj = static::createObj($product);
             $result[] = $obj;
         }
 
         return $result;
     }
 
-    public function getOneById(int $productId): self|null
+    public static function getOneById(int $productId): self|null
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM {$this->getTableName()} WHERE id = :productId");
+        $stmt = static::getPDO()->prepare("SELECT * FROM products WHERE id = :productId");
         $stmt->execute(['productId' => $productId]);
         $product = $stmt->fetch();
 
-        return $this->createObj($product);
+        return static::createObj($product);
     }
 
 

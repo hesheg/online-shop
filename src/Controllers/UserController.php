@@ -10,13 +10,6 @@ use Request\RegistrateRequest;
 
 class UserController extends BaseController
 {
-    private User $userModel;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->userModel = new User();
-    }
     public function getRegistrateForm()
     {
         require_once '../Views/registration_form.php';
@@ -29,7 +22,7 @@ class UserController extends BaseController
         if (empty($errors)) {
             $password_hash = password_hash($request->getPassword(), PASSWORD_DEFAULT);
 
-            $this->userModel->create($request->getName(), $request->getEmail(), $password_hash);
+            User::create($request->getName(), $request->getEmail(), $password_hash);
 
             header("Location: /login");
             exit;
@@ -66,10 +59,11 @@ class UserController extends BaseController
 
     public function profile()
     {
+//        throw new \Exception("Test error");
         if ($this->authService->check()) {
             $user = $this->authService->getCurrentUser();
 
-            $user = $this->userModel->getById($user->getId());
+            $user = User::getById($user->getId());
 
             require_once '../Views/profile_page.php';
         } else {
@@ -97,14 +91,14 @@ class UserController extends BaseController
             $email = $request->getEmail();
             $user = $this->authService->getCurrentUser();
 
-            $user = $this->userModel->getById($user->getId());
+            $user = User::getById($user->getId());
 
             if ($name !== $user->getName()) {
-                $this->userModel->updateNameById($name, $user->getId());
+                User::updateNameById($name, $user->getId());
             }
 
             if ($email !== $user->getEmail()) {
-                $this->userModel->updateEmailById($email, $user->getId());
+                User::updateEmailById($email, $user->getId());
             }
 
             header("Location: /profile");

@@ -3,17 +3,17 @@
 namespace Request;
 
 use Model\User;
-use Service\AuthService;
+use Service\Auth\AuthSessionService;
 
 class EditProfileRequest
 {
     private User $userModel;
-    private AuthService $authService;
+    private AuthSessionService $authService;
 
     public function __construct(private array $data)
     {
         $this->userModel = new User();
-        $this->authService = new AuthService();
+        $this->authService = new AuthSessionService();
     }
 
     public function getName()
@@ -51,7 +51,7 @@ class EditProfileRequest
             } elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
                 $errors['email'] = 'В email обязательно должны быть символы "@" и "."';
             } else {
-                $userDb = $this->userModel->getByEmail($email);
+                $userDb = User::getByEmail($email);
                 $user = $this->authService->getCurrentUser();
 
                 if ($userDb === null) {

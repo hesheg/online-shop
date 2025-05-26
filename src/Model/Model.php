@@ -6,12 +6,19 @@ use PDO;
 
 abstract class Model
 {
-    protected PDO $pdo;
+    protected static PDO $PDO;
 
-    public function __construct()
+    public static function getPDO(): PDO
     {
-        $this->pdo = new PDO("pgsql:host=db; port=5432; dbname=db;", username: "dbuser", password: "dbpwd");
+        static::$PDO = new PDO("pgsql:host=db; port=5432; dbname=db;", username: "dbuser", password: "dbpwd");
+
+        return static::$PDO;
     }
 
-    abstract protected function getTableName(): string;
+    public static function echoPre($value)
+    {
+        echo "<pre>";
+        print_r($value);
+        die;
+    }
 }

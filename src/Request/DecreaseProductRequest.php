@@ -29,7 +29,7 @@ class DecreaseProductRequest
 
         if (isset($this->data['product_id'])) {
             $productId = $this->data['product_id'];
-            $product = $this->productModel->getOneById($productId);
+            $product = Product::getOneById($productId);
 
             if ($product === null) {
                 $errors['product_id'] = 'Продукт не найден';

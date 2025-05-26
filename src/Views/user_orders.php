@@ -4,13 +4,16 @@
     <li><a href="/cart">Корзина</a></li>
 </ul>
 <header>
-    <h3>Ваши заказы</h3>
+    <h3>Ваши заказы - <?php echo count($userOrders); ?> шт</h3>
 </header>
 
 <main>
 
     <section class="checkout-form">
         <form action="/catalog" method="get">
+            <?php if (empty($userOrders)): ?>
+            <?php echo 'У вас еще нет заказов'; ?>
+            <?php endif; ?>
             <?php foreach ($userOrders as $userOrder): ?>
             <div class="form-control">
                 <?php echo 'Заказ №' . $userOrder->getId(); ?>
@@ -42,9 +45,7 @@
                 </div>
             </div>
                 <section class="checkout-details">
-<!--                    --><?php //foreach ($userOrders as $userOrder): ?>
-                        <?php $orderProducts = $userOrder->getOrderProducts(); ?>
-                        <?php foreach ($orderProducts as $orderProduct): ?>
+                    <?php foreach ($userOrder->getOrderProducts() as $orderProduct): ?>
                             <div class="checkout-details-inner">
                                 <div class="checkout-lists">
                                     <div class="card">
@@ -53,29 +54,23 @@
                                             <div class="card-name"><?php echo $orderProduct->getProduct()->getName(); ?></div>
                                             <div class="card-price"><?php echo '$' . $orderProduct->getProduct()->getPrice(); ?></div>
                                             <div class="card-wheel">
-<!--                                                <button>-</button>-->
                                                 <span><?php echo 'Количество: ' . $orderProduct->getAmount(); ?></span>
-<!--                                                <button>+</button>-->
                                             </div>
-<!--                                            --><?php //if ($orderProduct->getSum() <= 0): ?>
                                             <div class="card-price"><?php echo '$' . $orderProduct->getSum(); ?></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        <?php endforeach; ?>
+                    <?php endforeach; ?>
                         <div class="checkout-total">
                             <h6>Общая стоимость заказа</h6>
-                            <p><?php echo '$' . $userOrder->getTotal(); ?></p>
+                            <p><?php echo '$' . $userOrder->getTotalSum(); ?></p>
                         </div>
-<!--                    --><?php //endforeach; ?>
                 </section>
                 <br>
             <?php endforeach; ?>
         </form>
     </section>
-
-
 
 </main>
 

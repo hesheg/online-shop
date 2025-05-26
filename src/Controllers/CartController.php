@@ -63,6 +63,7 @@ class CartController extends BaseController
             header("Location: /login");
             exit;
         }
+
         $userProducts = $this->cartService->getUserProducts();
         $sum = $this->cartService->getSum();
 

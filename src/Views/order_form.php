@@ -13,7 +13,7 @@
     <div class="in-container">
         <h2>Personal Information</h2>
         <div class="row">
-                <input type="text" name="contact_name" id="contact_name">
+            <label for="contact_name"></label><input type="text" name="contact_name" id="contact_name">
                 <label for="name">Contact name</label>
             <?php if (isset($errors['contact_name'])): ?> <label style="color: brown">
                 <?php echo $errors['contact_name']; ?></label>
@@ -30,14 +30,14 @@
 
         <h2>Order Information</h2>
         <div class="row">
-            <input type="text" name="address" id="address">
+            <label for="address"></label><input type="text" name="address" id="address">
             <label for="lineone">Address</label>
             <?php if (isset($errors['address'])): ?> <label style="color: brown">
                 <?php echo $errors['address']; ?></label>
             <?php endif; ?>
         </div>
         <div class="row">
-            <input type="text" name="comment" id="comment">
+            <label for="comment"></label><input type="text" name="comment" id="comment">
             <label for="lineone">comment</label>
             <?php if (isset($errors['comment'])): ?> <label style="color: brown">
                 <?php echo $errors['comment']; ?></label>

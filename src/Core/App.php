@@ -2,6 +2,9 @@
 
 namespace Core;
 
+use Service\Logger\LoggerDbService;
+use Service\Logger\LoggerFileService;
+
 class App
 {
     private array $routes = [];
@@ -23,11 +26,17 @@ class App
 
                 $requestClass = $handler['request'];
 
-                if ($requestClass !== null) {
-                    $request = new $requestClass($_POST);
-                    $controller->$method($request);
-                } else {
-                    $controller->$method();
+                try {
+                    if ($requestClass !== null) {
+                        $request = new $requestClass($_POST);
+                        $controller->$method($request);
+                    } else {
+                        $controller->$method();
+                    }
+                } catch (\Throwable $exception) {
+                    $error = new LoggerDbService();
+
+                    $error->error($exception);
                 }
 
             } else {

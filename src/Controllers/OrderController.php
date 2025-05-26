@@ -3,32 +3,20 @@
 namespace Controllers;
 
 use DTO\OrderCreateDTO;
-use Model\Order;
-use Model\OrderProduct;
-use Model\Product;
 use Request\HandleCheckoutRequest;
+use Service\CartService;
 use Service\OrderService;
 
 class OrderController extends BaseController
 {
-    private Product $productModel;
-    private OrderProduct $orderProductModel;
-    private Order $orderModel;
     private OrderService $orderService;
+    private CartService $cartService;
 
     public function __construct()
     {
         parent::__construct();
-        $this->productModel = new Product();
-        $this->orderProductModel = new OrderProduct();
-        $this->orderModel = new Order();
         $this->orderService = new OrderService();
-    }
-
-
-    public function getUserOrderForm()
-    {
-        require_once '../Views/user_orders.php';
+        $this->cartService = new CartService();
     }
 
     public function getAllOrders()
@@ -38,31 +26,8 @@ class OrderController extends BaseController
             exit;
         }
 
-        $user = $this->authService->getCurrentUser();
-        $userOrders = $this->orderModel->getAllByUserId($user->getId());
-
-        if (empty($userOrders)) {
-            echo 'Вы еще не совершили первый заказ';
-        }
-
-        $total = 0;
-        foreach ($userOrders as $userOrder) {
-            $orderId = $userOrder->getId();
-            $orderProducts = $this->orderProductModel->getAllByOrderId($orderId);
-
-            foreach ($orderProducts as $orderProduct) {
-                $product = $this->productModel->getOneById($orderProduct->getProductId());
-
-                $sum = $product->getPrice() * $orderProduct->getAmount();
-                $orderProduct->setProduct($product);
-                $orderProduct->setSum($sum);
-                $total += $orderProduct->getSum();
-            }
-
-            $userOrder->setTotal($total);
-            $total = 0;
-            $userOrder->setOrderProducts($orderProducts);
-        }
+        $userOrders = $this->orderService->getAll();
+//        $this->echoPre($userOrders);
 
         require_once '../Views/user_orders.php';
     }
@@ -70,7 +35,19 @@ class OrderController extends BaseController
 
     public function getCheckoutForm()
     {
-        require_once '../Views/order_form.php';
+        if ($this->authService->check()) {
+            $userProducts = $this->cartService->getUserProducts();
+            if (empty($userProducts)) {
+                header('Location: /catalog');
+                exit;
+            }
+
+            $total = $this->cartService->getSum();
+            require_once '../Views/order_form.php';
+        } else {
+            header('Location: /login');
+            exit;
+        }
     }
 
     public function handleCheckout(HandleCheckoutRequest $request)

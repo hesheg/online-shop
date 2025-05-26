@@ -5,7 +5,7 @@ namespace Service;
 use DTO\AddReviewDTO;
 use Model\Review;
 
-class ReviewService
+class ReviewService extends BaseService
 {
     private Review $reviewModel;
 
@@ -15,7 +15,7 @@ class ReviewService
     }
     public function addReview(int $userId, AddReviewDTO $data, string $createdAt)
     {
-            $this->reviewModel->create(
+            Review::create(
                 $userId,
                 $data->getProductId(),
                 $data->getRating(),
